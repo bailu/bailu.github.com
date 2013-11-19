@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>仿淘宝商品多属性组合生成table</title>
+<script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/1.8.3/jquery.min.js"></script>
+</head>
+
+<body>
+<p>属性一</p>
+<ul class="sku_list">
+	<li><input type="checkbox" name="chk" value="01" /><label>01</label></li>
+    <li><input type="checkbox" name="chk" value="02" /><label>02</label></li>
+    <li><input type="checkbox" name="chk" value="03" /><label>03</label></li>
+    <li><input type="checkbox" name="chk" value="04" /><label>04</label></li>
+</ul>
+<p>属性二</p>
+<ul class="sku_list">
+	<li><input type="checkbox" name="chk" value="05" /><label>05</label></li>
+    <li><input type="checkbox" name="chk" value="06" /><label>06</label></li>
+    <li><input type="checkbox" name="chk" value="07" /><label>07</label></li>
+    <li><input type="checkbox" name="chk" value="08" /><label>08</label></li>
+</ul>
+<p>属性三</p>
+<ul class="sku_list">
+    <li><input type="checkbox" name="chk" value="09" /><label>09</label></li>
+	<li><input type="checkbox" name="chk" value="10" /><label>10</label></li>
+    <li><input type="checkbox" name="chk" value="11" /><label>11</label></li>
+    <li><input type="checkbox" name="chk" value="12" /><label>12</label></li>
+</ul>
+
+<div id="table_div">
+
+</div>
+<p>三个属性必须都有选择才会生成</p>
+<script type="text/javascript">
+function make_input_td(type, input_id)
+{
+	var ipt = document.createElement("input");
+	var name_id = type + input_id;
+	ipt.setAttribute('name', name_id);
+	ipt.setAttribute('id', name_id);
+	ipt.setAttribute('size', 4);
+	if(document.getElementById(name_id))
+	{
+		ipt.value = document.getElementById(name_id).value;
+	}
+	
+	var oTD = document.createElement("td"); 
+	oTD.appendChild(ipt)
+	
+	return oTD;
+}
+$(function(){
+	$("ul.sku_list input").on("click", function(){
+		var $uls = $("ul.sku_list");
+		var total_sl = $uls.length;	
+		
+		if($uls.filter(function() { return $("input:checked", this).length > 0; }).length < total_sl) return ;		
+		var oTable = document.createElement("table"); 
+		oTable.setAttribute("id","table");
+		oTable.setAttribute("border","1"); 
+		oTable.setAttribute("width","600"); 
+		oTable.setAttribute("cellspacing","0"); 
+		oTable.setAttribute("cellpadding","3"); 
+		
+		//创建tbody 
+		var oTbody = document.createElement("tbody"); 
+		
+		var oTR = document.createElement("tr"); 
+		for(var n=0; n<total_sl;n++)
+		{
+			var oTH = document.createElement("th");
+			oTH.innerHTML = $uls.eq(n).prev().html();
+			oTR.appendChild(oTH); 
+		}
+		
+		var oTH = document.createElement("th");
+		oTH.setAttribute("width","70");
+		oTH.innerHTML = '价格 <span style="color:red">*</span>';
+		oTR.appendChild(oTH);
+		
+		var oTH = document.createElement("th");
+		oTH.setAttribute("width","70");
+		oTH.innerHTML = '数量';
+		oTR.appendChild(oTH);
+		
+		oTbody.appendChild(oTR);
+		
+		var line = 1;
+		$uls.each(function(){
+			line = line * $(this).find("input:checked").length;
+		});
+		
+		
+		for (var i=0;i<line;i++)
+		{ 
+			//创建表格的第一行 
+			var oTR = document.createElement("tr"); 
+			var _rowspan = line;
+			var input_id = '';
+			for(var n=0; n<total_sl;n++)
+			{
+				var $chk = $uls.eq(n).find("input:checked");
+				_rowspan = _rowspan / $chk.length;
+				
+				var $chi = $chk.eq(parseInt(i/_rowspan)%$chk.length); 
+				input_id += '_' + $chi.val();
+				
+				if(i%_rowspan == 0) {
+					var oTD = document.createElement("td"); 
+					if(_rowspan > 1) oTD.setAttribute("rowspan",_rowspan); 
+					
+					
+					oTD.innerHTML = $chi.next().html(); 
+					oTR.appendChild(oTD); 
+					
+				}
+			}
+			
+			oTR.appendChild(make_input_td('price', input_id)); 
+			oTR.appendChild(make_input_td('qty', input_id)); 
+			
+			oTbody.appendChild(oTR);
+		}
+		oTable.appendChild(oTbody);
+		
+		document.getElementById('table_div').innerHTML = '';
+		document.getElementById('table_div').appendChild(oTable);
+	});
+});
+</script>
+</body>
+</html>
